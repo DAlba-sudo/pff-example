@@ -1,0 +1,7 @@
+
+{{ define "content" }}
+<h1>This is a component!</h1>
+
+<p>Name: {{ .Profile.Name }}</p>
+<p>Email: {{ .Profile.Email }}</p>
+{{ end }}
