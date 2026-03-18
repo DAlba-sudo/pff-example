@@ -7,68 +7,55 @@ import (
 )
 
 func main() {
+	// This sets up the web server. You generally do not need to modify this block.
+	// It tells the server to look for your HTML files in the "./templates/" folder.
 	app := pff.CreateApp(pff.Configuration{
 		TemplateDirectoryPath: "./templates/",
 		Address:               "0.0.0.0",
 		Port:                  8080,
 	})
 
+	// FRONTEND DEVELOPERS: To add a new web page, copy and modify the block below.
+	// The first parameter ("/some-random-endpoint") is the URL the user visits in their browser.
+	// The second parameter ("./templates/random") is the path to your specific HTML file.
 	random := app.RegisterTemplate("/some-random-endpoint", "./templates/random", pff.TemplateRegistrationOpts{
-		// use this option when you're building a page with other
-		// components
+		// Set to true if this page should be wrapped inside your shared base layout (e.g., base.html).
 		IncludeBaseTemplate: true,
 
-		// use this option if the user does not need to be signed in to
-		// use this component
+		// Set to true if anyone can view this page without needing to log in.
 		IsSessionUnprotected: true,
 	})
 
-	// This statement says that prior to rendering the template,
-	// we will go and get a user Profile.
+	// FRONTEND DEVELOPERS: This connects backend data to your HTML file.
+	// The string "Profile" is the variable name you will use in your HTML to display data.
+	// For example, you can write {{ .Profile.Name }} in your HTML to show the name.
+	// The backend engineer will build and provide the "BridgeProfile{}" component.
 	random.RegisterBridge("Profile", BridgeProfile{})
 
+	// This boots up the server. You do not need to touch this.
 	err := app.Start()
 	if err != nil {
 		panic(err)
 	}
 }
 
-// A "Bridge" is a function that interacts with the backend and returns
-// some data struture with content from that API (i.e., a Profile with name
-// and email, etc).
+// =========================================================================
+// BACKEND DEVELOPERS: Everything below this line is your responsibility.
+// Frontend developers do not need to edit or worry about the code below.
+// =========================================================================
 
+// Profile defines the structure of data sent to the frontend HTML template.
 type Profile struct {
-	// this is an example of a "class" that
-	// we can use to hold data in.
 	Name  string
 	Email string
 }
 
+// BridgeProfile contains the logic to fetch data from a database or API.
 type BridgeProfile struct{}
 
 func (b BridgeProfile) Data(wr http.ResponseWriter, req *http.Request) (any, error) {
-	// This is an example of a "bridge" that returns a
-	// profile object.
-
-	// Example of Request Approach to Populating Struct.
-	//
-	// backend_api_request, err := http.NewRequest("GET", "https://some-backend-api.com/profile", nil)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// resp, err := http.DefaultClient.Do(backend_api_request)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// var profile *Profile
-	// if err := json.NewDecoder(resp.Body).Decode(&profile); err != nil {
-	// 	return nil, err
-	// }
-
-	// Here we are manually setting the data. In reality,
-	// we would do something like what is commented above...
+	// The backend engineer writes the logic here to securely fetch the data
+	// and return it so the frontend can display it.
 	profile := &Profile{
 		Name:  "George P. Burdell",
 		Email: "George.Burdell@gatech.edu",
@@ -76,3 +63,4 @@ func (b BridgeProfile) Data(wr http.ResponseWriter, req *http.Request) (any, err
 
 	return profile, nil
 }
+
